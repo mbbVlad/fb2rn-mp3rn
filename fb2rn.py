@@ -1,12 +1,19 @@
-﻿"""Rename FB2-files according Autor and Title and Sequence
-    l or L - Lastname or LASTNAME 
-    f or F - Firstname or FIRSTNAME
-    t or T - Title or TITLE
-    s or S - Sequencename or SEQUENCENAME
+﻿#!/usr/bin/python3
+"""Rename FB2-files according Autor and Title and Sequence
+    l or L - Lastname (without change) or LASTNAME 
+    f or F - Firstname (without change) or FIRSTNAME
+    t or T - Title (without change) or TITLE
+    s or S - Sequencename (without change) or SEQUENCENAME
     n or N - Order in sequence (1,2,3,...)
     Example:
-             python fb2rn.py -LFt book.fb2
+             python fb2rn.py +LFt book.fb2
              >> "AUTORLASTNAME AUTORFIRSTNAME Title.fb2"
+
+             python fb2rn.py -LFt book.fb2
+             >> "AUTORLASTNAMEAUTORFIRSTNAMETitle.fb2"
+             
+             python fb2rn.py -L_F_t book.fb2
+             >> "AUTORLASTNAME_AUTORFIRSTNAME_Title.fb2"
 """
 import os
 import sys
@@ -14,7 +21,7 @@ from lxml import etree
 import glob
 
 __AUTHOR__ = 'MBB'
-__VERSION__ = 0.02
+__VERSION__ = 0.03
 __all__ = ['stripBetween', 'getFB2tags', 'getFB2tagsXML']
 
 
@@ -82,16 +89,16 @@ def getFB2tagsXML(fb2, noSeq=True):
 if __name__ == '__main__':
     ar_1st = sys.argv[1][1:]
     _1st = sys.argv[1][0]
-    if _1st[0] != '-':
-        print('Плохой 1й аргумент !')
-        exit(1)
+    if _1st not in '-+':
+         print('Плохой 1й аргумент !')
+         exit(1)
     for ar1 in sys.argv[2:]:
         for ar in glob.glob(ar1):
             if os.path.exists(ar):
                 f_name, l_name, b_title, seq_name, seq_n = getFB2tagsXML(ar)
                 d = dict(F=f_name.upper(), f=f_name, L=l_name.upper(), l=l_name, T=b_title.upper(), t=b_title,
                          S=seq_name.upper(), s=seq_name, N=seq_n, n=seq_n)
-                newFB2 = ''.join(d[c] + ' ' for c in ar_1st)
-                os.rename(ar, newFB2 + '.fb2')
+                newFB2 = ''.join(d.get(c, c) + (' ' if _1st == '+' else '') for c in ar_1st)
+                os.rename(ar, newFB2.rstrip() + '.fb2')
             else:
                 print("Файл", ar, "не найден!")
