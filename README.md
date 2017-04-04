@@ -1,7 +1,7 @@
 # fb2rn
 
 Rename FB2-files (eBooks) according to Autor and/or Title and/or Sequence
-(pytnon3 and lxml)
+(pytnon3 and lxml, was tested: Win8 and Linux Mint)
 
     l or L - Lastname (without change) or LASTNAME 
     f or F - Firstname (without change) or FIRSTNAME
