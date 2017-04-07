@@ -19,6 +19,7 @@ import os
 import sys
 from lxml import etree
 import glob
+#import re
 
 __AUTHOR__ = 'MBB'
 __VERSION__ = 0.03
@@ -88,9 +89,19 @@ def getFB2tagsXML(fb2):
 if __name__ == '__main__':
     ar_1st = sys.argv[1][1:]
     _1st = sys.argv[1][0]
+
     if _1st not in '-+':
         print('1st argument is bad!')
         exit(1)
+
+#    _bad = """[!@#$&~%\*\(\)\[\]\{\}"'\\:;><`]"""
+#    print(ar_1st, re.search(_bad, ar_1st))
+    _bad = """!@#$&~%*()[]{}"'\:;><`"""
+    for _c in ar_1st:
+        if _c in _bad:
+            print(_c, 'is bad separator!')
+            exit(2)
+
     for ar1 in sys.argv[2:]:
         for ar in glob.glob(ar1):
             if os.path.exists(ar):
@@ -98,6 +109,9 @@ if __name__ == '__main__':
                 d = dict(F=f_name.upper(), f=f_name, L=l_name.upper(), l=l_name, T=b_title.upper(), t=b_title,
                          S=seq_name.upper(), s=seq_name, N=seq_n, n=seq_n)
                 newFB2 = ''.join(d.get(c, c) + (' ' if _1st == '+' else '') for c in ar_1st)
-                os.rename(ar, newFB2.rstrip() + '.fb2')
+                try:
+                    os.rename(ar, newFB2.rstrip() + '.fb2')
+                except:
+                    print('I can`t to rename', ar)
             else:
                 print("File", ar, "not found!")
