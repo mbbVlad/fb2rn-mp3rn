@@ -21,7 +21,7 @@ Rename FB2-files (eBooks) according to Autor and/or Title and/or Sequence
 
 # Music files (mp3, ...)
 
-Rename Music-files according to Artisi and/or Title and/or Track
+Rename Music-files according to Artist and/or Title and/or Track
 (pytnon3 and mutagen, was tested: Win8 and Linux Mint on mp3-files)
 
     a or A - Artist (without change) or ARTIST 
