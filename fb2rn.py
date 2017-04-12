@@ -19,7 +19,6 @@ import os
 import sys
 from lxml import etree
 import glob
-import traceback
 
 # import re
 
@@ -114,6 +113,6 @@ if __name__ == '__main__':
                     os.rename(ar, newFB2.rstrip() + '.fb2')
                 except OSError:
                     print('I can`t to rename', ar)
-                    print(traceback.print_exc())
+                    print(sys.exc_info())
             else:
                 print("File", ar, "not found!")
