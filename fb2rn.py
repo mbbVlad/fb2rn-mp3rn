@@ -2,6 +2,7 @@
 """Rename FB2-files according to Autor and/or Title and/or Sequence
     l or L - Lastname (without change) or LASTNAME 
     f or F - Firstname (without change) or FIRSTNAME
+    m or M - Middlename (without change) or MIDDLENAME
     t or T - Title (without change) or TITLE
     s or S - Sequencename (without change) or SEQUENCENAME
     n or N - Order in sequence (1,2,3,...)
@@ -62,28 +63,30 @@ def get_fb2_tags_xml(fb2):
     """
     ft = '{http://www.gribuser.ru/xml/fictionbook/2.0}first-name'
     lt = '{http://www.gribuser.ru/xml/fictionbook/2.0}last-name'
+    mt = '{http://www.gribuser.ru/xml/fictionbook/2.0}middle-name'
     bt = '{http://www.gribuser.ru/xml/fictionbook/2.0}book-title'
     sq = '{http://www.gribuser.ru/xml/fictionbook/2.0}sequence'
     ti = '{http://www.gribuser.ru/xml/fictionbook/2.0}title-info'
-    f_n = l_n = b_t = s_name = s_n = ''
-    c = etree.iterparse(fb2, events=('end',), tag=[ft, lt, bt, sq, ti])
+    f_n = l_n = m_n = b_t = s_name = s_n = 'None'
+    c = etree.iterparse(fb2, events=('end',), tag=[ft, lt, mt, bt, sq, ti])
     for event, elem in c:
-        if not f_n and elem.tag == ft:
+        if f_n == 'None' and elem.tag == ft:
             f_n = elem.text
-        if not l_n and elem.tag == lt:
+        if  l_n == 'None' and elem.tag == lt:
             l_n = elem.text
-        if not b_t and elem.tag == bt:
+        if  m_n == 'None' and elem.tag == mt:
+            m_n = elem.text
+        if  b_t =='None' and elem.tag == bt:
             b_t = elem.text
-        if not s_name and elem.tag == sq:
+        if s_name == 'None' and elem.tag == sq:
             s_name = elem.get('name')
             s_n = elem.get('number')
+            if not s_n: s_n = 'None'
         elem.clear()
         while elem.getprevious() is not None:
             del elem.getparent()[0]
-        if elem.text == 'title-info':
-            break
     del c
-    return f_n, l_n, b_t, s_name, s_n
+    return f_n, l_n, m_n, b_t, s_name, s_n
 
 
 if __name__ == '__main__':
@@ -105,8 +108,8 @@ if __name__ == '__main__':
     for ar1 in sys.argv[2:]:
         for ar in glob.glob(ar1):
             if os.path.exists(ar):
-                f_name, l_name, b_title, seq_name, seq_n = get_fb2_tags_xml(ar)
-                d = dict(F=f_name.upper(), f=f_name, L=l_name.upper(), l=l_name, T=b_title.upper(), t=b_title,
+                f_name, l_name, m_name, b_title, seq_name, seq_n = get_fb2_tags_xml(ar)
+                d = dict(F=f_name.upper(), f=f_name, L=l_name.upper(), l=l_name, M=m_name.upper(), m=m_name, T=b_title.upper(), t=b_title,
                          S=seq_name.upper(), s=seq_name, N=seq_n, n=seq_n)
                 newFB2 = ''.join(d.get(c, c) + (' ' if _1st == '+' else '') for c in ar_1st)
                 try:
