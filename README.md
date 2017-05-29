@@ -5,6 +5,7 @@ Rename FB2-files (eBooks) according to Autor and/or Title and/or Sequence
 
     l or L - Lastname (without change) or LASTNAME 
     f or F - Firstname (without change) or FIRSTNAME
+    m or M - Middlename (without change) or MIDDLENAME
     t or T - Title (without change) or TITLE
     s or S - Sequencename (without change) or SEQUENCENAME
     n or N - Order in sequence (1,2,3,...)
