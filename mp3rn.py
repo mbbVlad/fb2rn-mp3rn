@@ -26,7 +26,7 @@ import glob
 
 
 __AUTHOR__ = 'MBB'
-__VERSION__ = 0.01
+__VERSION__ = 0.02
 __all__ = ['get_mp3_tags', 'print_info']
 
 
@@ -34,17 +34,19 @@ def get_mp3_tags(mp3):
     """From Music-file retrieve artist and title and track tags
     """
     _info = mutagen.File(mp3)
-    a = _info.get('TPE1', ('UnknownArtist',''))[0]     # artist
-    t = _info.get('TIT2', ('UnknownTitle',''))[0]      # title
-    r = _info.get('TRCK', ('UnknownTrack',''))[0]      # track
-    y = str(_info.get('TDRC', ('UnknownYear',''))[0])  # year
-    g = _info.get('TCON', ('UnknownGenre',''))[0]      # genre
-    b = _info.get('TALB', ('UnknownTrack',''))[0]      # album
+    a = _info.get('TPE1', ('UnknownArtist', ''))[0]     # artist
+    t = _info.get('TIT2', ('UnknownTitle', ''))[0]      # title
+    r = _info.get('TRCK', ('UnknownTrack', ''))[0]      # track
+    y = str(_info.get('TDRC', ('UnknownYear', ''))[0])  # year
+    g = _info.get('TCON', ('UnknownGenre', ''))[0]      # genre
+    b = _info.get('TALB', ('UnknownTrack', ''))[0]      # album
     return a, t, r, y, g, b
+
 
 def print_info(fn):
     """Onle print some tags
     """
+    print('\n==Common info==')
     print('File:', fn)
     print('Artist:', _artist)
     print('Title:', _title)
@@ -52,6 +54,24 @@ def print_info(fn):
     print('Year:', _year)
     print('Genre:', _genre)
     print('Track №:', _track)
+
+    if fn.upper().endswith('MP3'):
+        from mutagen.mp3 import MP3
+        i = MP3(fn).info
+        print('\n==MP3 info==')
+        print('Lenght:', int(i.length//60), 'm', round(i.length % 60), 's')
+        print('Channels:', i.channels)
+        print(i.bitrate_mode)
+        print('Bitrate:', i.bitrate//1000)
+        print('Sample rate:', i.sample_rate)
+        print('Track gain:', i.track_gain)
+        print('Track peak:', i.track_peak)
+        print('Album gain:', i.album_gain)
+        print('Encoder info:', i.encoder_info)
+        print('Encoder settings:', i.encoder_settings)
+        print('Version:', i.version)
+        print('Layer:', i.layer)
+        print('Mode:', i.mode)
 
 if __name__ == '__main__':
     ar_1st = sys.argv[1][1:]
@@ -71,9 +91,8 @@ if __name__ == '__main__':
             if os.path.exists(ar):
                 _, _ext = os.path.splitext(ar)
                 _artist, _title, _track, _year, _genre, _album = get_mp3_tags(ar)
-                d = dict(A=_artist.upper(), a=_artist, T=_title.upper(), t=_title,
-                         R=_track, r=_track, Y=_year, y=_year, G=_genre.upper(), g=_genre,
-                         B=_album.upper(), b=_album)
+                d = dict(A=_artist.upper(), a=_artist, T=_title.upper(), t=_title, R=_track, r=_track,
+                         Y=_year, y=_year, G=_genre.upper(), g=_genre, B=_album.upper(), b=_album)
                 if _1st == 'P':
                     print_info(ar)
                     continue
@@ -85,3 +104,4 @@ if __name__ == '__main__':
                     print(sys.exc_info())
             else:
                 print("File", ar, "not found!")
+

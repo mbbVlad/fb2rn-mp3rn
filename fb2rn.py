@@ -24,7 +24,7 @@ import glob
 # import re
 
 __AUTHOR__ = 'MBB'
-__VERSION__ = 0.03
+__VERSION__ = 0.04
 __all__ = ['strip_between', 'get_fb2_tags', 'get_fb2_tags_xml']
 
 
@@ -52,10 +52,11 @@ def get_fb2_tags(fb2):
     f.close()
     f_n = strip_between(line, '<first-name>', '</first-name>')
     l_n = strip_between(line, '<last-name>', '</last-name>')
+    m_n = strip_between(line, '<middle-name>', '</middle-name>')
     b_t = strip_between(line, '<book-title>', '</book-title>')
     s_name = strip_between(line, '<sequence name="', 'number')[:-2]
     s_n = strip_between(line, 'number="', '"')
-    return f_n, l_n, b_t, s_name, s_n
+    return f_n, l_n, m_n, b_t, s_name, s_n
 
 
 def get_fb2_tags_xml(fb2):
@@ -67,21 +68,22 @@ def get_fb2_tags_xml(fb2):
     bt = '{http://www.gribuser.ru/xml/fictionbook/2.0}book-title'
     sq = '{http://www.gribuser.ru/xml/fictionbook/2.0}sequence'
     ti = '{http://www.gribuser.ru/xml/fictionbook/2.0}title-info'
-    f_n = l_n = m_n = b_t = s_name = s_n = 'None'
+    f_n = l_n = m_n = b_t = s_name = s_n = 'Unknown'
     c = etree.iterparse(fb2, events=('end',), tag=[ft, lt, mt, bt, sq, ti])
     for event, elem in c:
-        if f_n == 'None' and elem.tag == ft:
+        if f_n == 'Unknown' and elem.tag == ft:
             f_n = elem.text
-        if  l_n == 'None' and elem.tag == lt:
+        if l_n == 'Unknown' and elem.tag == lt:
             l_n = elem.text
-        if  m_n == 'None' and elem.tag == mt:
+        if m_n == 'Unknown' and elem.tag == mt:
             m_n = elem.text
-        if  b_t =='None' and elem.tag == bt:
+        if b_t == 'Unknown' and elem.tag == bt:
             b_t = elem.text
-        if s_name == 'None' and elem.tag == sq:
+        if s_name == 'Unknown' and elem.tag == sq:
             s_name = elem.get('name')
             s_n = elem.get('number')
-            if not s_n: s_n = 'None'
+            if not s_n:
+                s_n = 'Unknown'
         elem.clear()
         while elem.getprevious() is not None:
             del elem.getparent()[0]
@@ -97,11 +99,9 @@ if __name__ == '__main__':
         print('1st argument is bad!')
         exit(1)
 
-    #    _bad = """[!@#$&~%\*\(\)\[\]\{\}"'\\:;><`]"""
-    #    print(ar_1st, re.search(_bad, ar_1st))
-
     for _c in ar_1st:
-        if _c in """!@#$&~%*()[]{}"'\:;><`""":
+        # if _c in """!@#$&~%*()[]{}"'\:;><`""":
+        if _c in """!@#$&~%*[]{}"'\:;><`""":
             print(_c, 'is bad separator!')
             exit(2)
 
@@ -109,8 +109,8 @@ if __name__ == '__main__':
         for ar in glob.glob(ar1):
             if os.path.exists(ar):
                 f_name, l_name, m_name, b_title, seq_name, seq_n = get_fb2_tags_xml(ar)
-                d = dict(F=f_name.upper(), f=f_name, L=l_name.upper(), l=l_name, M=m_name.upper(), m=m_name, T=b_title.upper(), t=b_title,
-                         S=seq_name.upper(), s=seq_name, N=seq_n, n=seq_n)
+                d = dict(F=f_name.upper(), f=f_name, L=l_name.upper(), l=l_name, M=m_name.upper(), m=m_name,
+                         T=b_title.upper(), t=b_title, S=seq_name.upper(), s=seq_name, N=seq_n, n=seq_n)
                 newFB2 = ''.join(d.get(c, c) + (' ' if _1st == '+' else '') for c in ar_1st)
                 try:
                     os.rename(ar, newFB2.rstrip() + '.fb2')
