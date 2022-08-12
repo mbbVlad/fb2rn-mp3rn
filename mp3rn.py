@@ -1,6 +1,6 @@
-﻿#!/usr/bin/python3
-"""Rename Music-files according to Artisi and/or Title and/or Track
-    a or A - Artist (without change) or ARTIST 
+#!/usr/bin/python3
+"""Rename Music-files according to Artist and/or Title and/or Track
+    a or A - Artist (without change) or ARTIST
     t or T - Title (without change) or TITLE
     r or R - Track
     y or Y - Year
@@ -12,17 +12,17 @@
 
             python3 mp3rn.py -At mus.mp3
              >> "ARTISTTitle.mp3"
-             
+
             python3 mp3rn.py -A_t mus.mp3
              >> "ARTIST_Title.mp3"
-             
+
     P - print tags-info on console ("P" must be without -+)
-            python3 P mus.mp3
+            python3 mp3rn.py P your_file.mp3
 """
 import os
 import sys
-import mutagen
 import glob
+import mutagen
 
 
 __AUTHOR__ = 'MBB'
@@ -39,27 +39,27 @@ def get_mp3_tags(mp3):
     r = _info.get('TRCK', ('UnknownTrack', ''))[0]      # track
     y = str(_info.get('TDRC', ('UnknownYear', ''))[0])  # year
     g = _info.get('TCON', ('UnknownGenre', ''))[0]      # genre
-    b = _info.get('TALB', ('UnknownTrack', ''))[0]      # album
+    b = _info.get('TALB', ('UnknownAlbum', ''))[0]      # album
     return a, t, r, y, g, b
 
 
-def print_info(fn):
-    """Onle print some tags
+def print_info(fn, **kwargs):
+    """Only print some tags
     """
     print('\n==Common info==')
     print('File:', fn)
-    print('Artist:', _artist)
-    print('Title:', _title)
-    print('Album:', _album)
-    print('Year:', _year)
-    print('Genre:', _genre)
-    print('Track №:', _track)
+    print('Artist:', kwargs['a'])
+    print('Title:', kwargs['t'])
+    print('Album:', kwargs['b'])
+    print('Year:', kwargs['y'])
+    print('Genre:', kwargs['g'])
+    print('Track №:', kwargs['r'])
 
     if fn.upper().endswith('MP3'):
         from mutagen.mp3 import MP3
         i = MP3(fn).info
         print('\n==MP3 info==')
-        print('Lenght:', int(i.length//60), 'm', round(i.length % 60), 's')
+        print('Length:', int(i.length//60), 'm', round(i.length % 60), 's')
         print('Channels:', i.channels)
         print(i.bitrate_mode)
         print('Bitrate:', i.bitrate//1000)
@@ -72,6 +72,7 @@ def print_info(fn):
         print('Version:', i.version)
         print('Layer:', i.layer)
         print('Mode:', i.mode)
+
 
 if __name__ == '__main__':
     ar_1st = sys.argv[1][1:]
@@ -94,7 +95,7 @@ if __name__ == '__main__':
                 d = dict(A=_artist.upper(), a=_artist, T=_title.upper(), t=_title, R=_track, r=_track,
                          Y=_year, y=_year, G=_genre.upper(), g=_genre, B=_album.upper(), b=_album)
                 if _1st == 'P':
-                    print_info(ar)
+                    print_info(ar, **d)
                     continue
                 newMP3 = ''.join(d.get(c, c) + (' ' if _1st == '+' else '') for c in ar_1st)
                 try:
@@ -104,4 +105,3 @@ if __name__ == '__main__':
                     print(sys.exc_info())
             else:
                 print("File", ar, "not found!")
-
